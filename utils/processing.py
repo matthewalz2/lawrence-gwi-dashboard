@@ -51,4 +51,3 @@ def clean_age_sex_data_f(data):
     data = data.rename(columns={'Group': 'Age Group'})
     return data
 
-print(clean_race_data_mixed(df1))
