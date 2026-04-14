@@ -1,4 +1,5 @@
 from utils.data_loader import read_csv_fallback
+import pandas as pd
 
 df1 = read_csv_fallback('data/Lawrence GWI Race.csv')
 df2 = read_csv_fallback('data/Lawrence GWI Renter.csv')
@@ -41,13 +42,27 @@ def clean_housing_data(data):
     housing = data.drop(data.index[0])
     return housing
 
-def clean_age_sex_data_m(data):
-    data = data[2:25]
-    data = data.rename(columns={'Group': 'Age Group'})
-    return data
+def clean_age_sex_data(data):
+    # Rename columns
+    data = data.rename(columns={
+        data.columns[0]: "Age Group",
+        data.columns[1]: "Estimate"
+    })
 
-def clean_age_sex_data_f(data):
-    data = data[26:]
-    data = data.rename(columns={'Group': 'Age Group'})
-    return data
+    # Clean numeric column
+    data["Estimate"] = data["Estimate"].replace({",": ""}, regex=True)
+    data["Estimate"] = data["Estimate"].astype(int)
+
+    # Split male and female sections
+    male = data[2:25][["Age Group", "Estimate"]].copy()
+    female = data[26:][["Age Group", "Estimate"]].copy()
+
+    # Add gender labels
+    male["Gender"] = "Male"
+    female["Gender"] = "Female"
+
+    # Combine into one dataset (THIS is the key change)
+    combined = pd.concat([male, female], axis=0)
+
+    return combined
 

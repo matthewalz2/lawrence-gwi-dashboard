@@ -1,6 +1,6 @@
 import streamlit as st
 from utils.data_loader import read_csv_fallback
-from utils.processing import clean_race_data_single, clean_race_data_mixed, clean_housing_data, clean_age_sex_data_f, clean_age_sex_data_m
+from utils.processing import clean_race_data_single, clean_race_data_mixed, clean_housing_data, clean_age_sex_data
 
 
 st.title('Lawrence GWI')
@@ -17,8 +17,7 @@ except Exception as e:
 cleaned_race_single = clean_race_data_single(df1)
 cleaned_race_mixed = clean_race_data_mixed(df1)
 cleaned_housing = clean_housing_data(df2)
-cleaned_female = clean_age_sex_data_f(df3)
-cleaned_male = clean_age_sex_data_m(df3)
+cleaned_age_gender = clean_age_sex_data(df3)
 
 tab1, tab2, tab3, tab4= st.tabs(["Home", "Demographics", "Housing", "Gender Distribution"])
 
@@ -40,5 +39,4 @@ with tab4:
     st.header("Gender Distribution by Age")
     st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
     st.write('Preview of Data 3')
-    st.dataframe(cleaned_female)
-    st.dataframe(cleaned_male)
+    st.dataframe(cleaned_age_gender)
