@@ -1,5 +1,6 @@
 import streamlit as st
 from utils.data_loader import read_csv_fallback
+from utils.processing import clean_race_data_single, clean_race_data_mixed, clean_housing_data, clean_age_sex_data_f, clean_age_sex_data_m
 
 
 st.title('Lawrence GWI')
@@ -12,10 +13,14 @@ except Exception as e:
 	st.error(f"Failed to load CSV files: {e}")
 	st.stop()
 
-#st.write("Preview of Data 1")
-#st.dataframe(df1.head())
+#save cleaned datasets as variables
+cleaned_race_single = clean_race_data_single(df1)
+cleaned_race_mixed = clean_race_data_mixed(df1)
+cleaned_housing = clean_housing_data(df2)
+cleaned_female = clean_age_sex_data_f(df3)
+cleaned_male = clean_age_sex_data_m(df3)
 
-tab1, tab2, tab3, tab4= st.tabs(["Home", "Df1", "Df2", "Df3"])
+tab1, tab2, tab3, tab4= st.tabs(["Home", "Demographics", "Housing", "Gender Distribution"])
 
 with tab1:
     st.header("Welcome to the Lawrence GWI Dashboard")
@@ -23,14 +28,17 @@ with tab2:
     st.header("Demographics")
     st.image("https://static.streamlit.io/examples/cat.jpg", width=200)
     st.write("Preview of Data 1")
-    st.dataframe(df1.iloc[1:9])
+    st.dataframe(cleaned_race_single)
+    st.dataframe(cleaned_race_mixed)
+
 with tab3:
     st.header("Housing Information")
     st.image("https://static.streamlit.io/examples/dog.jpg", width=200)
     st.write('Preview of Data 2')
-    st.dataframe(df2.head())
+    st.dataframe(cleaned_housing)
 with tab4:
     st.header("Gender Distribution by Age")
     st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
     st.write('Preview of Data 3')
-    st.dataframe(df3)
+    st.dataframe(cleaned_female)
+    st.dataframe(cleaned_male)
