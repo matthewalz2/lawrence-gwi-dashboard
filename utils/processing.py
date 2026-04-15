@@ -34,13 +34,30 @@ def clean_race_data_mixed(data):
     return mixed_race
 
 def clean_housing_data(data):
-    data = data.rename(columns={'Unnamed: 0': 'Categories', 
-                                'Lawrence city, Massachusetts':'Estimate',
-                                'Unnamed: 2': 'Margin of Error'})
+    data.columns = data.columns.str.strip()
 
-    data['Categories'] = data['Categories'].str.strip(':')
-    housing = data.drop(data.index[0])
-    return housing
+    data = data.rename(columns={
+        data.columns[0]: 'Categories',
+        data.columns[1]: 'Estimate',
+        data.columns[2]: 'Margin of Error'
+    })
+
+    # Clean text
+    data['Categories'] = data['Categories'].str.strip(':').str.strip()
+
+    # Clean numbers
+    data['Estimate'] = data['Estimate'].replace({',': ''}, regex=True)
+    data['Estimate'] = pd.to_numeric(data['Estimate'], errors='coerce')
+
+    # drop bad rows
+    data = data[~data['Categories'].isin(['Label', 'Total'])]
+
+    # Keep only what we need
+    data = data[['Categories', 'Estimate']].copy()
+    unknown = pd.DataFrame({'Categories': ['Unknown'], 'Estimate': [89332 - data['Estimate'].sum()]})
+    data = pd.concat([data, unknown], ignore_index=True)
+
+    return data
 
 def clean_age_sex_data(data):
     # Rename columns

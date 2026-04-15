@@ -1,5 +1,8 @@
-from utils.processing import clean_race_data_single, clean_race_data_mixed, clean_housing_data, clean_age_sex_data_f, clean_age_sex_data_m
+from utils.processing import clean_race_data_single, clean_race_data_mixed, clean_housing_data, clean_age_sex_data
 import plotly as px
+#Not the best way to import this, but i want to keep plotly
+import plotly.express as pxx
+import plotly.graph_objects as go
 import streamlit as st
 from utils.data_loader import read_csv_fallback
 
@@ -11,8 +14,8 @@ df3 = read_csv_fallback('data/Lawrence GWI Sex by Age.csv')
 cleaned_race_single = clean_race_data_single(df1)
 cleaned_race_mixed = clean_race_data_mixed(df1)
 cleaned_housing = clean_housing_data(df2)
-cleaned_female = clean_age_sex_data_f(df3)
-cleaned_male = clean_age_sex_data_m(df3)
+cleaned_age_gender = clean_age_sex_data(df3)
+
 
 '''
 RACE BY AGE VISUALIZATION
@@ -50,12 +53,44 @@ Ideal format
 
                 to the end
 
+# Visualization for Age Gender Distribution
 
 
 '''
+# Visualization for Age Gender Distribution
 
+def plot_age_gender(age_sex):
+    fig = pxx.bar(
+        age_sex,
+        x="Age Group",
+        y="Estimate",
+        color="Gender",
+        text="Gender"
+    )
 
+    fig.update_layout(
+        title={
+            "text": "Population Distribution by Age Group and Gender in Lawrence, MA",
+            "x": 0.5,
+            "xanchor": "center"
+        },
+        xaxis_title="Age Group",
+        yaxis_title="Population"
+    )
 
+    fig.update_layout(xaxis_tickangle=-45)
+
+    return fig
+
+def plot_housing(housing_data):
+    # Visualization
+    labels = housing_data['Categories']
+    values = housing_data['Estimate']
+
+    # Use `hole` to create a donut-like pie chart
+    fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.3)])
+
+    return fig
 
 
 

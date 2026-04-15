@@ -1,6 +1,7 @@
 import streamlit as st
 from utils.data_loader import read_csv_fallback
 from utils.processing import clean_race_data_single, clean_race_data_mixed, clean_housing_data, clean_age_sex_data
+from utils.visualization import plot_age_gender, plot_housing
 
 
 st.title('Lawrence GWI')
@@ -32,11 +33,13 @@ with tab2:
 
 with tab3:
     st.header("Housing Information")
-    st.image("https://static.streamlit.io/examples/dog.jpg", width=200)
     st.write('Preview of Data 2')
+    fig = plot_housing(cleaned_housing)
+    st.plotly_chart(fig)
     st.dataframe(cleaned_housing)
 with tab4:
     st.header("Gender Distribution by Age")
-    st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
+    fig = plot_age_gender(cleaned_age_gender)
+    st.plotly_chart(fig)
     st.write('Preview of Data 3')
     st.dataframe(cleaned_age_gender)
