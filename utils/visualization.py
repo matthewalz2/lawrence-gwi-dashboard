@@ -93,5 +93,10 @@ def plot_housing(housing_data):
     return fig
 
 
+'''
+Function for plotting cleaned Employment data
+Function for plotting cleaned Education data
+'''
+
 
 

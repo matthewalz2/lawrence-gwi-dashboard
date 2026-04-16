@@ -83,3 +83,8 @@ def clean_age_sex_data(data):
 
     return combined
 
+
+'''
+Function to clean Employment data
+Function to clean Education data
+'''
