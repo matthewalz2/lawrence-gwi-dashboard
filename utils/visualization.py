@@ -1,4 +1,4 @@
-from utils.processing import clean_race_data_single, clean_race_data_mixed, clean_housing_data, clean_age_sex_data
+from utils.processing import clean_race_data_single, clean_race_data_mixed, clean_housing_data, clean_age_sex_data, clean_education_18_24, clean_ed_earnings_25_plus
 import plotly as px
 #Not the best way to import this, but i want to keep plotly
 import plotly.express as pxx
@@ -9,12 +9,15 @@ from utils.data_loader import read_csv_fallback
 df1 = read_csv_fallback('data/Lawrence GWI Race.csv')
 df2 = read_csv_fallback('data/Lawrence GWI Renter.csv')
 df3 = read_csv_fallback('data/Lawrence GWI Sex by Age.csv')
+df4 = read_csv_fallback('data/Lawrence GWI Education.csv')
 
 #save cleaned datasets as variables
 cleaned_race_single = clean_race_data_single(df1)
 cleaned_race_mixed = clean_race_data_mixed(df1)
 cleaned_housing = clean_housing_data(df2)
 cleaned_age_gender = clean_age_sex_data(df3)
+cleaned_ed_18_24 = clean_education_18_24(df4)
+cleaned_ed_earnings_25_plus = clean_ed_earnings_25_plus(df4)
 
 
 '''
@@ -98,5 +101,26 @@ Function for plotting cleaned Employment data
 Function for plotting cleaned Education data
 '''
 
+def plot_education_18_24(ed_data):
+    labels = ed_data['Groups']
+    values = ed_data['Estimate']
+    # Use `hole` to create a donut-like pie chart
+    fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.3)])
+    fig.update_layout(
+        title={
+            "text": "Distribution of Education Attainment for 18-24 Year Olds in Lawrence, MA",
+            "x": 0.44,
+            "xanchor": "center"
+        })
+    return fig
 
 
+def plot_education_25_plus(ed_data):
+    fig = pxx.bar(ed_data, x='Groups', y='Estimate', hover_data=['Groups', 'Estimate', 'Margin of Error'], color='Estimated Salary', labels={'Groups': 'Education Attainment Groups'}, height=400)
+    fig.update_layout(
+        title={
+            "text": "Title",
+            "x": 0.44,
+            "xanchor": "center"
+        })
+    return fig
