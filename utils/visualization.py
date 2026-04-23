@@ -1,5 +1,6 @@
-from utils.processing import clean_race_data_single, clean_race_data_mixed, clean_housing_data, clean_age_sex_data, clean_education_18_24, clean_ed_earnings_25_plus
+from utils.processing import clean_race_data_single, clean_housing_data, clean_age_sex_data, clean_education_18_24, clean_ed_earnings_25_plus
 import plotly as px
+import pandas as pd
 #Not the best way to import this, but i want to keep plotly
 import plotly.express as pxx
 import plotly.graph_objects as go
@@ -13,7 +14,6 @@ df4 = read_csv_fallback('data/Lawrence GWI Education.csv')
 
 #save cleaned datasets as variables
 cleaned_race_single = clean_race_data_single(df1)
-cleaned_race_mixed = clean_race_data_mixed(df1)
 cleaned_housing = clean_housing_data(df2)
 cleaned_age_gender = clean_age_sex_data(df3)
 cleaned_ed_18_24 = clean_education_18_24(df4)
@@ -62,7 +62,19 @@ Ideal format
 '''
 # Visualization for Age Gender Distribution
 
+
 def plot_age_gender(age_sex):
+    #reorder our new categories
+    order = [
+    "Under 5", "5–9", "10–17", "18–24",
+    "25–34", "35–44", "45–54",
+    "55–64", "65–74", "75–84", "85+"
+]
+
+    age_sex["Age Group"] = pd.Categorical(age_sex["Age Group"], categories=order, ordered=True)
+    age_sex = age_sex.sort_values("Age Group")
+
+    
     fig = pxx.bar(
         age_sex,
         x="Age Group",
@@ -123,4 +135,29 @@ def plot_education_25_plus(ed_data):
             "x": 0.44,
             "xanchor": "center"
         })
+    return fig
+
+
+#This will need to be changed for other cities, or maybe not we can just address it like how
+#we will here
+def plot_race(race_data):
+    race_data = race_data.copy()
+
+    race_data['Resident Count'] = (
+    race_data['Resident Count']
+    .astype(str)
+    .str.replace(',', '', regex=True)
+    .str.strip()
+)
+    race_data['Resident Count'] = pd.to_numeric(race_data['Resident Count'], errors='coerce')
+
+    plot_race_data = race_data[race_data['Resident Count'] > 0]
+    fig = pxx.bar(plot_race_data, x='Race', y='Resident Count')
+    fig.update_layout(
+        title={
+            "text": "Race Distribution in Lawrence<br><sup>Note: Unreported Categories: American Indian and Alaska Native alone and Native Hawaiian and Other Pacific Islander alone</sup>",
+            "x": 0.5,
+            "xanchor": "center"
+        }
+    )
     return fig

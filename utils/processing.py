@@ -1,5 +1,6 @@
 from utils.data_loader import read_csv_fallback
 import pandas as pd
+import re
 
 df1 = read_csv_fallback('data/Lawrence GWI Race.csv')
 df2 = read_csv_fallback('data/Lawrence GWI Renter.csv')
@@ -17,22 +18,10 @@ def clean_race_data_single(data):
 })
 
     #Filter to single race values
-    single_race = data[1:7]
+    race = data[1:8]
 
-    return single_race
+    return race
 
-def clean_race_data_mixed(data):
-    #Strip label column from any punctuation/white space
-    data['Label (Grouping)'] = data['Label (Grouping)'].str.strip()
-    data['Label (Grouping)'] = data['Label (Grouping)'].str.strip(':')
-
-    #Rename my columns
-    data = data.rename(columns={'Label (Grouping)': 'Race',
-                                'Lawrence city, Massachusetts!!Estimate' : 'Resident Count'})
-    
-    #Filter for mixed race rows
-    mixed_race = data[7:]
-    return mixed_race
 
 def clean_housing_data(data):
     data.columns = data.columns.str.strip()
@@ -60,6 +49,52 @@ def clean_housing_data(data):
 
     return data
 
+#This function allows us to create custom binning, just mapping labels to different first number values in preestablished labels. 
+
+def bin_age_groups(df):
+    df = df.copy()
+
+    def map_bin(label):
+        if "Under 5" in label:
+            return "Under 5"
+        if "5 to 9" in label or "5-9" in label:
+            return "5–9"
+        if "85" in label:
+            return "85+"
+
+        match = re.search(r'\d+', label)
+        if not match:
+            return label
+
+        age = int(match.group())
+
+        if 10 <= age <= 17:
+            return "10–17"
+        elif 18 <= age <= 24:
+            return "18–24"
+        elif 25 <= age <= 34:
+            return "25–34"
+        elif 35 <= age <= 44:
+            return "35–44"
+        elif 45 <= age <= 54:
+            return "45–54"
+        elif 55 <= age <= 64:
+            return "55–64"
+        elif 65 <= age <= 74:
+            return "65–74"
+        elif 75 <= age <= 84:
+            return "75–84"
+        else:
+            return label
+
+    df["Age Group"] = df["Age Group"].apply(map_bin)
+
+    # group after mapping
+    df = df.groupby(["Age Group", "Gender"], as_index=False)["Estimate"].sum()
+
+    return df
+
+
 def clean_age_sex_data(data):
     # Rename columns
     data = data.rename(columns={
@@ -78,6 +113,10 @@ def clean_age_sex_data(data):
     # Add gender labels
     male["Gender"] = "Male"
     female["Gender"] = "Female"
+
+    #apply our previous binning function
+    male = bin_age_groups(male)
+    female = bin_age_groups(female)
 
     # Combine into one dataset (THIS is the key change)
     combined = pd.concat([male, female], axis=0)
