@@ -43,26 +43,12 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(
 # with tab1:
 #     st.header("Welcome to the Lawrence GWI Dashboard")
 with tab1:
-    st.header("Demographics")
-    fig = plot_race(cleaned_race_single)
-    st.plotly_chart(fig)
-    st.write("Race Distribution in Lawrence")
-    st.dataframe(cleaned_race_single)
-
-
-with tab2:
-    st.header("Housing Information")
-    st.write("Property Renter and Owner Distribution")
-    fig = plot_housing(cleaned_housing)
-    st.plotly_chart(fig)
-    st.dataframe(cleaned_housing)
-with tab3:
     st.header("Gender Distribution by Age")
     fig = plot_age_gender(cleaned_age_gender)
     st.plotly_chart(fig)
     st.write("Preview of Data 3")
     st.dataframe(cleaned_age_gender)
-with tab4:
+with tab2:
     st.header("Education")
     fig = plot_education_18_24(cleaned_ed_18_24)
     fig2 = plot_education_25_plus(cleaned_ed_earnings_25_plus)
@@ -72,5 +58,17 @@ with tab4:
     st.plotly_chart(fig2)
     st.write("Education Attainment of 25+ Year Olds")
     st.dataframe(cleaned_ed_earnings_25_plus)
+with tab3:
+    st.header("Demographics")
+    fig = plot_race(cleaned_race_single)
+    st.plotly_chart(fig)
+    st.write("Race Distribution in Lawrence")
+    st.dataframe(cleaned_race_single)
+with tab4:
+    st.header("Housing Information")
+    st.write("Property Renter and Owner Distribution")
+    fig = plot_housing(cleaned_housing)
+    st.plotly_chart(fig)
+    st.dataframe(cleaned_housing)
 with tab5:
     st.header("Economy")
