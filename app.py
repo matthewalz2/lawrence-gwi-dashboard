@@ -35,7 +35,7 @@ cleaned_ed_18_24 = clean_education_18_24(df4)
 cleaned_ed_earnings_25_plus = clean_ed_earnings_25_plus(df4)
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs(
-    ["Demographics", "Housing", "Gender Distribution", "Education", "Economy"]
+    ["Gender Distribution", "Education", "Demographics", "Housing", "Economy"]
 )
 
 
