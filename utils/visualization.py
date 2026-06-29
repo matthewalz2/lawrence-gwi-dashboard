@@ -68,8 +68,8 @@ def plot_age_gender(cleaned_age_gender):
         barmode="stack",
         text="Count",
         color_discrete_map={
-            "Male": "#FA5C00",
-            "Female": "#FF0000"
+            "Male": "#4C78A8",
+            "Female": "#E74C3C"
         },
         title="Population Distribution by Age and Gender in Lawrence, MA"
     )
