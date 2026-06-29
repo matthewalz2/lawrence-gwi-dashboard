@@ -2,257 +2,328 @@ from utils.data_loader import read_csv_fallback
 import pandas as pd
 import re
 
-df1 = read_csv_fallback('data/Lawrence GWI Race.csv')
-df2 = read_csv_fallback('data/Lawrence GWI Renter.csv')
-df3 = read_csv_fallback('data/Lawrence GWI Sex by Age.csv')
-df4 = read_csv_fallback('data/Lawrence GWI Education.csv')
+'''====================================='''
+#NEW FUNCTIONS BELOW
+'''====================================='''
 
-def clean_race_data_single(data):
-    #Strip label column from any punctuation/white space
-    data['Label (Grouping)'] = data['Label (Grouping)'].str.strip()
-    data['Label (Grouping)'] = data['Label (Grouping)'].str.strip(':')
+#🟩🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦DEMOGRAPHIC PROCESSING🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟩
+#Age and gender processing and sorting from census downloader
+def age_gender_processing(demo_df):
+    # Make a copy to avoid modifying the original DataFrame
+    demo = demo_df.copy()
 
-    #Rename my columns
-    data = data.rename(columns={'Label (Grouping)': 'Race',
-                                'Lawrence city, Massachusetts!!Estimate' : 'Resident Count'
-})
+    # Drop specified rows
+    demo = demo.drop(demo.index[[44, 45, 28]])
+    demo = demo[5:51]
 
-    #Filter to single race values
-    race = data[1:8]
+    # Organization of Male and Female Age Groups
+    male_df = demo[demo['groups'].str.startswith('Male: ')].copy()
+    female_df = demo[demo['groups'].str.startswith('Female: ')].copy()
 
-    return race
+    male_df['age_group'] = male_df['groups'].str.replace('Male: ', '')
+    female_df['age_group'] = female_df['groups'].str.replace('Female: ', '')
 
+    male_df = male_df.rename(columns={'values': 'male_count'})
+    female_df = female_df.rename(columns={'values': 'female_count'})
 
-def clean_housing_data(data):
-    data.columns = data.columns.str.strip()
+    demographics_df = pd.merge(male_df[['age_group', 'male_count']], female_df[['age_group', 'female_count']], on='age_group', how='outer')
 
-    data = data.rename(columns={
-        data.columns[0]: 'Categories',
-        data.columns[1]: 'Estimate',
-        data.columns[2]: 'Margin of Error'
+    demographics_df['total'] = demographics_df['male_count'] + demographics_df['female_count']
+
+    demographics_df = demographics_df[['age_group', 'male_count', 'female_count', 'total']]
+
+    # Original custom binning function (nested within or defined before if preferred)
+    def bin_age_groups(df):
+        df = df.copy()
+
+        def map_bin(label):
+            if 'Under 5' in label:
+                return 'Under 5'
+            if '5 to 9' in label or '5-9' in label or '5–9' in label:
+                return '5–9'
+            if '85' in label:
+                return '85+'
+
+            match = re.search(r'\d+', label)
+            if not match:
+                return label
+
+            age = int(match.group())
+
+            if 10 <= age <= 17:
+                return '10–17'
+            elif 18 <= age <= 24:
+                return '18–24'
+            elif 25 <= age <= 34:
+                return '25–34'
+            elif 35 <= age <= 44:
+                return '35–44'
+            elif 45 <= age <= 54:
+                return '45–54'
+            elif 55 <= age <= 64:
+                return '55–64'
+            elif 65 <= age <= 74:
+                return '65–74'
+            elif 75 <= age <= 84:
+                return '75–84'
+            else:
+                return label
+
+        df['Age Group'] = df['Age Group'].apply(map_bin)
+
+        # group after mapping
+        df = df.groupby(['Age Group', 'Gender'], as_index=False)['Estimate'].sum()
+
+        return df
+
+    # Melt the demographics_df to create 'Gender' and 'Estimate' columns
+    demographics_melted = demographics_df.melt(
+        id_vars=['age_group'],
+        value_vars=['male_count', 'female_count'],
+        var_name='Gender',
+        value_name='Estimate'
+    )
+
+    # Rename 'age_group' to 'Age Group' to match the function's expectation
+    demographics_melted = demographics_melted.rename(columns={'age_group': 'Age Group'})
+
+    # Map 'male_count' to 'Male' and 'female_count' to 'Female'
+    demographics_melted['Gender'] = demographics_melted['Gender'].replace({
+        'male_count': 'Male',
+        'female_count': 'Female'
     })
 
-    # Clean text
-    data['Categories'] = data['Categories'].str.strip(':').str.strip()
+    # Apply the binning function
+    binned_demographics_melted = bin_age_groups(demographics_melted)
 
-    # Clean numbers
-    data['Estimate'] = data['Estimate'].replace({',': ''}, regex=True)
-    data['Estimate'] = pd.to_numeric(data['Estimate'], errors='coerce')
+    # Pivot the binned_demographics_melted back to the desired format
+    binned_demographics_df = binned_demographics_melted.pivot_table(
+        index='Age Group',
+        columns='Gender',
+        values='Estimate',
+        fill_value=0
+    ).reset_index()
 
-    # drop bad rows
-    data = data[~data['Categories'].isin(['Label', 'Total'])]
+    binned_demographics_df.columns.name = None # Remove the 'Gender' column name from index
 
-    # Keep only what we need
-    data = data[['Categories', 'Estimate']].copy()
-    unknown = pd.DataFrame({'Categories': ['Unknown'], 'Estimate': [89332 - data['Estimate'].sum()]})
-    data = pd.concat([data, unknown], ignore_index=True)
-
-    return data
-
-#This function allows us to create custom binning, just mapping labels to different first number values in preestablished labels. 
-
-def bin_age_groups(df):
-    df = df.copy()
-
-    def map_bin(label):
-        if "Under 5" in label:
-            return "Under 5"
-        if "5 to 9" in label or "5-9" in label:
-            return "5–9"
-        if "85" in label:
-            return "85+"
-
-        match = re.search(r'\d+', label)
-        if not match:
-            return label
-
-        age = int(match.group())
-
-        if 10 <= age <= 17:
-            return "10–17"
-        elif 18 <= age <= 24:
-            return "18–24"
-        elif 25 <= age <= 34:
-            return "25–34"
-        elif 35 <= age <= 44:
-            return "35–44"
-        elif 45 <= age <= 54:
-            return "45–54"
-        elif 55 <= age <= 64:
-            return "55–64"
-        elif 65 <= age <= 74:
-            return "65–74"
-        elif 75 <= age <= 84:
-            return "75–84"
-        else:
-            return label
-
-    df["Age Group"] = df["Age Group"].apply(map_bin)
-
-    # group after mapping
-    df = df.groupby(["Age Group", "Gender"], as_index=False)["Estimate"].sum()
-
-    return df
-
-
-def clean_age_sex_data(data):
-    # Rename columns
-    data = data.rename(columns={
-        data.columns[0]: "Age Group",
-        data.columns[1]: "Estimate"
+    # Rename columns to match the requested output
+    binned_demographics_df = binned_demographics_df.rename(columns={
+        'Male': 'male_count',
+        'Female': 'female_count'
     })
 
-    # Clean numeric column
-    data["Estimate"] = data["Estimate"].replace({",": ""}, regex=True)
-    data["Estimate"] = data["Estimate"].astype(int)
+    # Calculate the total
+    binned_demographics_df['total'] = binned_demographics_df['male_count'] + binned_demographics_df['female_count']
 
-    # Split male and female sections
-    male = data[2:25][["Age Group", "Estimate"]].copy()
-    female = data[26:][["Age Group", "Estimate"]].copy()
+    # Reorder columns
+    binned_demographics_df = binned_demographics_df[['Age Group', 'male_count', 'female_count', 'total']]
 
-    # Add gender labels
-    male["Gender"] = "Male"
-    female["Gender"] = "Female"
-
-    #apply our previous binning function
-    male = bin_age_groups(male)
-    female = bin_age_groups(female)
-
-    # Combine into one dataset (THIS is the key change)
-    combined = pd.concat([male, female], axis=0)
-
-    return combined
-
-'''Education will have two dataframes that need to be plotted, one will
-   be for 18-24 year olds donut plot, one will be color coded bar chart 
-   for 25+, colors are salary
-'''
-def clean_education_18_24(data):
-  data.columns = data.columns.str.strip()
-
-  #rename columns
-  data = data.rename(columns={
-        data.columns[0]: 'Groups',
-        data.columns[1]: 'Estimate',
-        data.columns[2]: 'Margin of Error',
-        data.columns[3]: 'Percent Estimate',
-        data.columns[4]: 'Percent Margin of Error'
-  })
-
-  #For overview, only need these columns for general population not gendered
-  data = data[['Groups', 'Estimate', 'Margin of Error', 'Percent Estimate', 'Percent Margin of Error']]
-
-  # clean all columns for special characters
-  for col_name in data:
-    data[col_name] = (
-        data[col_name]
-        .astype(str)
-        .str.replace('\xa0', '', regex=True)
-        .str.replace('Â', '', regex=True)
-        .str.strip()
-    )
-
-  #drop first row
-  data = data.drop(data.index[0])
-  data = data.iloc[1:5]
-
-  #strip estimate from commas and store as integer
-  data['Estimate'] = (
-        data['Estimate']
-        .astype(str)
-        .str.replace(',', '', regex=True)
-        .astype(int)
-    )
-
-  return data
-
-
-
-def clean_ed_earnings_25_plus(ed_data):
-    # -----------------------------
-    # CLEAN BASE DATA
-    # -----------------------------
-    ed_data.columns = ed_data.columns.str.strip()
-
-    ed_data = ed_data.rename(columns={
-        ed_data.columns[0]: 'Groups',
-        ed_data.columns[1]: 'Estimate',
-        ed_data.columns[2]: 'Margin of Error',
-        ed_data.columns[3]: 'Percent Estimate',
-        ed_data.columns[4]: 'Percent Margin of Error'
-    })
-
-    ed_data = ed_data[['Groups', 'Estimate', 'Margin of Error',
-                       'Percent Estimate', 'Percent Margin of Error']]
-
-    # Clean text
-    ed_data['Groups'] = (
-        ed_data['Groups']
-        .astype(str)
-        .str.replace('\xa0', '', regex=True)
-        .str.replace('Â', '', regex=True)
-        .str.strip()
-    )
-
-    # -----------------------------
-    # 25+ EDUCATION DATA (7 rows)
-    # -----------------------------
-    ed_25_plus = ed_data.iloc[7:14].copy()
-
-    ed_25_plus['Estimate'] = (
-        ed_25_plus['Estimate']
-        .astype(str)
-        .str.replace(',', '', regex=True)
-    )
-    ed_25_plus['Estimate'] = pd.to_numeric(ed_25_plus['Estimate'], errors='coerce')
-
-    # -----------------------------
-    # EARNINGS DATA
-    # -----------------------------
-    earnings = ed_data.iloc[62:69].copy()
-
-    earnings = earnings[['Groups', 'Estimate']]
-    earnings = earnings.rename(columns={'Estimate': 'Estimated Salary'})
-
-    earnings['Estimated Salary'] = (
-        earnings['Estimated Salary']
-        .astype(str)
-        .str.replace(',', '', regex=True)
-    )
-    earnings['Estimated Salary'] = pd.to_numeric(earnings['Estimated Salary'], errors='coerce')
-
-    # Drop aggregate row
-    earnings = earnings.iloc[1:].copy()
-
-    # Get correct base values
-    base = earnings['Estimated Salary'].tolist()[1:]
-
-    # Build EXACT correct structure
-    salary_values = [
-        38531,      # Less than 9th
-        38531,      # 9–12
-        base[0],    # HS → 39082
-        base[1],    # Some college → 41079
-        base[1],    # Associate's → 41079
-        base[2],    # Bachelor's → 62026
-        base[3]     # Graduate → 64186
+    # Proper order of the categories
+    age_group_order = [
+        'Under 5',
+        '5–9',
+        '10–17',
+        '18–24',
+        '25–34',
+        '35–44',
+        '45–54',
+        '55–64',
+        '65–74',
+        '75–84',
+        '85+'
     ]
 
-    # Assign to dataframe
-    ed_25_plus['Estimated Salary'] = salary_values
+    print("Unique Age Groups before Categorical conversion:")
+    print(binned_demographics_df['Age Group'].unique())
 
-    # Return final cleaned dataframe
-    return ed_25_plus
+    binned_demographics_df['Age Group'] = pd.Categorical(binned_demographics_df['Age Group'], categories=age_group_order, ordered=True)
 
+    sorted_age_gender_df = binned_demographics_df.sort_values('Age Group').reset_index(drop=True)
 
-
-
-
+    return sorted_age_gender_df
 
 
+#General Race Distribution (Almost identical to first iteration)
+def demo_race_processing(demo_df):
+  race = demo_df[55:61].copy()
+  return race
+
+#HISPANIC POPULATION (May be interesting if the population is dominant with other race, at least since Lawrence is)
+def demo_hispanic_processing(demo_df):
+    hispanic = demo_df[81:111].copy()
+
+    # Remove summary rows
+    hispanic = hispanic[
+        ~hispanic["groups"].isin([
+            "Total (citizenship universe)",
+            "Hispanic or Latino"
+        ])
+    ]
+
+    hispanic["values"] = pd.to_numeric(
+        hispanic["values"],
+        errors="coerce"
+    )
+
+    threshold = 1000
+
+    # Combine small groups and the existing "All other Hispanic or Latino"
+    hispanic["group"] = hispanic.apply(
+        lambda row: (
+            "Other"
+            if (
+                row["values"] < threshold
+                or row["groups"] == "All other Hispanic or Latino"
+            )
+            else row["groups"]
+        ),
+        axis=1
+    )
+
+    hispanic = (
+        hispanic.groupby("group", as_index=False)["values"]
+        .sum()
+    )
+
+    # Force Other to the bottom
+    hispanic["sort"] = hispanic["group"].eq("Other")
+
+    hispanic = (
+        hispanic.sort_values(
+            ["sort", "values"],
+            ascending=[True, False]
+        )
+        .drop(columns="sort")
+        .reset_index(drop=True)
+    )
+
+    return hispanic
 
 
 
-'''
-Function to clean Employment data
-'''
+
+
+
+
+#🟩🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦EDUCATION PROCESSING🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟩
+def edu_attainment_processing(edu_df):
+
+    attain = edu_df[1:25].copy()
+
+    less_than_12th = [
+        "Nursery school",
+        "Kindergarten",
+        "1st grade",
+        "2nd grade",
+        "3rd grade",
+        "4th grade",
+        "5th grade",
+        "6th grade",
+        "7th grade",
+        "8th grade",
+        "9th grade",
+        "10th grade",
+        "11th grade"
+    ]
+
+    less_than_12th_total = attain.loc[
+        attain["groups"].isin(less_than_12th),
+        "values"
+    ].sum()
+
+    attain = attain[
+        ~attain["groups"].isin(less_than_12th)
+    ].copy()
+
+    less_than_row = pd.DataFrame({
+        "groups": ["Less than 12th grade"],
+        "values": [less_than_12th_total]
+    })
+
+    attain = pd.concat(
+        [attain, less_than_row],
+        ignore_index=True
+    )
+
+    order = [
+        "No schooling completed",
+        "Less than 12th grade",
+        "12th grade, no diploma",
+        "Regular high school diploma",
+        "GED or alternative credential",
+        "Some college, less than 1 year",
+        "Some college, 1 or more years, no degree",
+        "Associate's degree",
+        "Bachelor's degree",
+        "Master's degree",
+        "Professional school degree",
+        "Doctorate degree"
+    ]
+
+    attain["groups"] = pd.Categorical(
+        attain["groups"],
+        categories=order,
+        ordered=True
+    )
+
+    attain = attain.sort_values("groups").reset_index(drop=True)
+
+    return attain
+
+def edu_enrollment_processing(edu_df):
+    enroll = edu_df.iloc[64:71].copy()
+    
+    enroll['groups'] = enroll['groups'].str.replace("Enrolled: ", "", regex=False)
+    
+    return enroll
+
+def edu_tech_access_processing(edu_df):
+  tech = edu_df.iloc[122:127].copy()
+  return tech
+
+def edu_internet_processing(edu_df):
+  internet = edu_df.iloc[128:].copy()
+
+  #Shorten the text on broadband
+  internet.at[131, 'groups'] = 'Broadband (cable, fiber optic, or DSL)'
+  return internet
+
+
+#🟩🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦ECONOMIC PROCESSING🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟩
+# Labor force (population over 16 labor force)
+def employ_labor_processing(employ_df):
+  labor = employ_df.iloc[3:7].copy()
+  return labor
+
+# Work Commuters (population over 16 commuting excluding WFH row)
+def employ_commute_processing(employ_df):
+    commute = employ_df.iloc[89:103].copy()
+
+    # Rename rows
+    commute.at[89, 'groups'] = 'Car, truck, or van (alone)'
+    commute.at[90, 'groups'] = 'Car, truck, or van (carpool)'
+
+    # Drop summary rows
+    commute = commute.drop(index=[91, 97])
+
+    # Remove rows where values == 0
+    commute = commute[commute["values"] != 0]
+
+    return commute
+
+# Commute Length 
+def employ_commute_length_processing(employ_df):
+  commute_length = employ_df.iloc[104:116].copy()
+
+  return commute_length
+
+#Earnings Gendered, Earnings by Ed Attainment
+#Just present as numbers, not viz
+def employ_gender_earnings_processing(employ_df):
+  gender_earnings = employ_df[117:121].copy()
+  return gender_earnings
+
+# Earnings by Eduction (Just numbers, no viz)
+def employ_ed_earnings_processing(employ_df):
+  ed_earnings = employ_df[122:].copy()
+  return ed_earnings
