@@ -34,7 +34,7 @@ from utils.visualization import (
 
 
 st.title("Lawrence Community Metrics")
-st.write("The data was downloded from ACS.")
+st.write("All data from American Community Survey 2022 5-year Estimates (ACS)")
 
 try:
     edu = read_csv_fallback("data/Lawrence_Education.csv")
