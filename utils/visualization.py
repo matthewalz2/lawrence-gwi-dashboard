@@ -480,3 +480,246 @@ def plot_com_length(cleaned_com_length):
     )
 
     return fig
+
+#🟩🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦HOUSING VISUALIZATION FUNCTIONS🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟩
+# ------------------------------
+# Housing Occupancy
+# ------------------------------
+def plot_housing_occupancy(data):
+    plot_data = data.copy()
+
+    plot_data["values"] = pd.to_numeric(
+        plot_data["values"],
+        errors="coerce"
+    )
+
+    plot_data = plot_data[
+        plot_data["groups"].isin(["Occupied", "Vacant"])
+    ].dropna(subset=["values"])
+
+    fig = px.pie(
+        plot_data,
+        names="groups",
+        values="values",
+        hole=0.45,
+        title="Housing Occupancy Status",
+        color="groups",
+        color_discrete_map={
+            "Occupied": "#2E8B57",
+            "Vacant": "#B0B0B0"
+        }
+    )
+
+    fig.update_traces(
+        textinfo="label+percent",
+        hovertemplate="<b>%{label}</b><br>Housing Units: %{value:,.0f}<br>Percent: %{percent}<extra></extra>"
+    )
+
+    fig.update_layout(
+        legend_title="Status",
+        margin=dict(t=70, b=30, l=30, r=30)
+    )
+
+    return fig
+
+
+# ------------------------------
+# Occupants per Room
+# ------------------------------
+def plot_housing_occupants(data):
+    fig = px.bar(
+        data,
+        x="Occupants per Room",
+        y="values",
+        color="Tenure",
+        barmode="group",
+        title="Occupants per Room by Housing Tenure",
+        labels={
+            "values": "Housing Units",
+            "Occupants per Room": "Occupants per Room",
+            "Tenure": "Housing Tenure"
+        },
+        color_discrete_map={
+            "Owner": "#2E8B57",
+            "Renter": "#81C784"
+        }
+    )
+
+    fig.update_traces(
+        hovertemplate="<b>%{fullData.name}</b><br>%{x}<br>Housing Units: %{y:,.0f}<extra></extra>"
+    )
+
+    fig.update_layout(
+        xaxis_tickangle=-20,
+        legend_title="Tenure",
+        margin=dict(t=70, b=100, l=50, r=30)
+    )
+
+    return fig
+
+
+# ------------------------------
+# Housing Unit Count
+# ------------------------------
+def plot_housing_unit_count(data):
+    plot_data = data.copy()
+
+    plot_data["values"] = pd.to_numeric(
+        plot_data["values"],
+        errors="coerce"
+    )
+
+    plot_data = plot_data[
+        ~plot_data["groups"].str.contains("Total", case=False, na=False)
+    ]
+
+    fig = px.bar(
+        plot_data,
+        x="values",
+        y="groups",
+        orientation="h",
+        title="Housing Units by Structure Type",
+        labels={
+            "values": "Housing Units",
+            "groups": "Structure Type"
+        },
+        text="values"
+    )
+
+    fig.update_traces(
+        marker_color="#2E8B57",
+        texttemplate="%{text:,.0f}",
+        textposition="outside",
+        hovertemplate="<b>%{y}</b><br>Housing Units: %{x:,.0f}<extra></extra>"
+    )
+
+    fig.update_layout(
+        yaxis={"categoryorder": "total ascending"},
+        margin=dict(t=70, b=40, l=220, r=80)
+    )
+
+    return fig
+
+
+# ------------------------------
+# Year Built
+# ------------------------------
+def plot_housing_year_built(data):
+    plot_data = data.copy()
+
+    plot_data["values"] = pd.to_numeric(
+        plot_data["values"],
+        errors="coerce"
+    )
+
+    plot_data = plot_data[
+        ~plot_data["groups"].str.contains("Total", case=False, na=False)
+    ]
+
+    fig = px.bar(
+        plot_data,
+        x="values",
+        y="groups",
+        orientation="h",
+        title="Year Housing Units Were Built",
+        labels={
+            "values": "Housing Units",
+            "groups": "Year Built"
+        },
+        text="values"
+    )
+
+    fig.update_traces(
+        marker_color="#2E8B57",
+        texttemplate="%{text:,.0f}",
+        textposition="outside",
+        hovertemplate="<b>%{y}</b><br>Housing Units: %{x:,.0f}<extra></extra>"
+    )
+
+    fig.update_layout(
+        yaxis={"categoryorder": "total ascending"},
+        margin=dict(t=70, b=40, l=180, r=80)
+    )
+
+    return fig
+
+
+# ------------------------------
+# Gross Rent
+# ------------------------------
+def plot_housing_rent_price(data):
+    plot_data = data.copy()
+
+    plot_data["values"] = pd.to_numeric(
+        plot_data["values"],
+        errors="coerce"
+    )
+
+    plot_data = plot_data[
+        ~plot_data["groups"].str.contains("Total", case=False, na=False)
+    ]
+
+    fig = px.bar(
+        plot_data,
+        x="values",
+        y="groups",
+        orientation="h",
+        title="Monthly Gross Rent Distribution",
+        labels={
+            "values": "Rental Units",
+            "groups": "Monthly Rent"
+        },
+        text="values"
+    )
+
+    fig.update_traces(
+        marker_color="#2E8B57",
+        texttemplate="%{text:,.0f}",
+        textposition="outside",
+        hovertemplate="<b>%{y}</b><br>Units: %{x:,.0f}<extra></extra>"
+    )
+
+    fig.update_layout(
+        yaxis={"categoryorder": "total ascending"},
+        margin=dict(t=70, b=40, l=180, r=80)
+    )
+
+    return fig
+
+
+# ------------------------------
+# Owner Home Value
+# ------------------------------
+def plot_housing_owner_value(data):
+    plot_data = data.copy()
+
+    plot_data["values"] = pd.to_numeric(
+        plot_data["values"],
+        errors="coerce"
+    )
+
+    fig = px.bar(
+        plot_data,
+        x="groups",
+        y="values",
+        title="Owner-Occupied Home Value Distribution",
+        labels={
+            "groups": "Home Value",
+            "values": "Housing Units"
+        },
+        text="values"
+    )
+
+    fig.update_traces(
+        marker_color="#2E8B57",
+        texttemplate="%{text:,.0f}",
+        textposition="outside",
+        hovertemplate="<b>%{x}</b><br>Housing Units: %{y:,.0f}<extra></extra>"
+    )
+
+    fig.update_layout(
+        xaxis_tickangle=-45,
+        margin=dict(t=70, b=120, l=60, r=40)
+    )
+
+    return fig

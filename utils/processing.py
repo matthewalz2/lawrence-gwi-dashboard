@@ -327,3 +327,85 @@ def employ_gender_earnings_processing(employ_df):
 def employ_ed_earnings_processing(employ_df):
   ed_earnings = employ_df[122:].copy()
   return ed_earnings
+
+#🟩🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦HOUSING PROCESSING🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟩
+def housing_occupancy(housing_df):
+  occupany = housing_df[1:4].copy()
+  return occupany
+
+def housing_occupants_processing(housing_df):
+    occupants = housing_df.iloc[14:26].copy()
+
+    # Remove the owner/renter total rows
+    occupants = occupants[
+        ~occupants["groups"].isin([
+            "Owner occupied",
+            "Renter occupied"
+        ])
+    ].copy()
+
+    # Split labels into housing type and occupancy category
+    occupants[["Tenure", "Occupants per Room"]] = (
+        occupants["groups"]
+        .str.split(": ", n=1, expand=True)
+    )
+
+    occupants["values"] = pd.to_numeric(
+        occupants["values"],
+        errors="coerce"
+    )
+
+    occupants = occupants[
+        ["Tenure", "Occupants per Room", "values"]
+    ]
+
+    category_order = [
+        "0.50 or less occupants per room",
+        "0.51 to 1.00 occupants per room",
+        "1.01 to 1.50 occupants per room",
+        "1.51 to 2.00 occupants per room",
+        "2.01 or more occupants per room"
+    ]
+
+    occupants["Occupants per Room"] = pd.Categorical(
+        occupants["Occupants per Room"],
+        categories=category_order,
+        ordered=True
+    )
+
+    return occupants.sort_values("Occupants per Room")
+
+def housing_unit_count(housing_df):
+  unit_count = housing_df[28:36].copy()
+  return unit_count
+
+def housing_year_built(housing_df):
+  year_built = housing_df[38:50].copy()
+  year_built = year_built.drop([44, 45])
+  return year_built
+
+def housing_rent_price(housing_df):
+  rent_price = housing_df[88:111].copy()
+  return rent_price
+
+def housing_owner_value(housing_df):
+    owner_value = housing_df[125:151].copy()
+
+    # Bin everything under $100k
+    under_100k = owner_value.iloc[:13]["values"].sum()
+
+    # Keep everything $100k and above
+    owner_value = owner_value.iloc[13:].copy()
+
+    # Add the new binned row
+    new_row = {
+        "groups": "Less than $100,000",
+        "values": under_100k
+    }
+
+    owner_value = pd.concat(
+        [pd.DataFrame([new_row]), owner_value],
+        ignore_index=True
+    )
+
+    return owner_value

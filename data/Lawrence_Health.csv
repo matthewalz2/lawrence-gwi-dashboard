@@ -1,0 +1,64 @@
+groups,values
+Total civilian noninstitutionalized population,87336
+Male: Total,43242
+Male: Under 6 years — with health insurance,3814
+Male: Under 6 years — no health insurance,3767
+Male: 6 to 17 years — with health insurance,47
+Male: 6 to 17 years — no health insurance,9227
+Male: 18 to 24 years — with health insurance,9107
+Male: 18 to 24 years — no health insurance,120
+Male: 25 to 34 years — with health insurance,5633
+Male: 25 to 34 years — no health insurance,4776
+Male: 35 to 44 years — with health insurance,857
+Male: 35 to 44 years — no health insurance,6544
+Male: 45 to 54 years — with health insurance,5493
+Male: 45 to 54 years — no health insurance,1051
+Male: 55 to 64 years — with health insurance,5449
+Male: 55 to 64 years — no health insurance,5009
+Male: 65 to 74 years — with health insurance,440
+Male: 65 to 74 years — no health insurance,4699
+Male: 75 years and over — with health insurance,4200
+Male: 75 years and over — no health insurance,499
+Female: Total,4500
+Female: Under 6 years — with health insurance,4357
+Female: Under 6 years — no health insurance,143
+Female: 6 to 17 years — with health insurance,2114
+Female: 6 to 17 years — no health insurance,2077
+Female: 18 to 24 years — with health insurance,37
+Female: 18 to 24 years — no health insurance,1262
+Female: 25 to 34 years — with health insurance,1262
+Female: 25 to 34 years — no health insurance,0
+Female: 35 to 44 years — with health insurance,44094
+Female: 35 to 44 years — no health insurance,4435
+Female: 45 to 54 years — with health insurance,4361
+Female: 45 to 54 years — no health insurance,74
+Female: 55 to 64 years — with health insurance,7964
+Female: 55 to 64 years — no health insurance,7681
+Female: 65 to 74 years — with health insurance,283
+Female: 65 to 74 years — no health insurance,4850
+Female: 75 years and over — with health insurance,4572
+Female: 75 years and over — no health insurance,278
+Total civilian noninstitutionalized population,87336
+Male,43242
+Male: 5 to 17 years — with a disability,75
+Male: 18 to 34 years — with a disability,766
+Male: 35 to 64 years — with a disability,1425
+state,25
+place,34550
+Male: 65 to 74 years — with a disability,2133
+Male: 75 years and over — with a disability,720
+Female,720
+Female: 5 to 17 years — with a disability,44094
+Female: 18 to 34 years — with a disability,3704
+Female: 35 to 64 years — with a disability,7282
+Female: 65 to 74 years — with a disability,11100
+Female: 75 years and over — with a disability,13735
+Total civilian population 18 years and over,64137
+Veteran,993
+Nonveteran,63144
+Male: Total,31205
+Male: Veteran,737
+Male: Nonveteran,30468
+Female: Total,12925
+Female: Veteran,86
+Female: Nonveteran,12839

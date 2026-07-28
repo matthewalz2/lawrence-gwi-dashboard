@@ -16,7 +16,12 @@ from utils.processing import (
     employ_commute_length_processing,
     employ_gender_earnings_processing,
     employ_ed_earnings_processing,
-    demo_hispanic_processing,
+    housing_occupancy,
+    housing_occupants_processing,
+    housing_unit_count,
+    housing_year_built,
+    housing_rent_price,
+    housing_owner_value
 )
 
 from utils.visualization import (
@@ -30,7 +35,14 @@ from utils.visualization import (
     plot_labor,
     plot_com_length,
     plot_hispanic,
+    plot_housing_occupancy,
+    plot_housing_occupants,
+    plot_housing_unit_count,
+    plot_housing_year_built,
+    plot_housing_rent_price,
+    plot_housing_owner_value
 )
+
 
 
 st.title("Lawrence Community Metrics")
@@ -42,6 +54,8 @@ try:
     edu = read_csv_fallback("data/Lawrence_Education.csv")
     demo = read_csv_fallback("data/Lawrence_Demographics.csv")
     employ = read_csv_fallback("data/Lawrence_Employment.csv")
+    housing = read_csv_fallback("data/Lawrence_Housing.csv")
+
 except Exception as e:
     st.error(f"Failed to load CSV files: {e}")
     st.stop()
@@ -65,6 +79,13 @@ cleaned_employ_com_length = employ_commute_length_processing(employ)
 cleaned_employ_gender_earnings = employ_gender_earnings_processing(employ)
 cleaned_employ_ed_earnings = employ_ed_earnings_processing(employ)
 
+#Housing
+cleaned_housing_occupancy = housing_occupancy(housing)
+cleaned_housing_occupants = housing_occupants_processing(housing)
+cleaned_housing_unit_count = housing_unit_count(housing)
+cleaned_housing_year_built = housing_year_built(housing)
+cleaned_housing_rent_price = housing_rent_price(housing)
+cleaned_housing_owner_value = housing_owner_value(housing)
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs(
     ["Demographics", "Education", "Economics", "Health", "Housing"]
@@ -320,3 +341,165 @@ with tab4:
     st.header("Health")
 with tab5:
     st.header("Housing")
+
+    # Housing Occupancy
+    st.subheader("Housing Occupancy Status")
+    st.caption(
+        "Nearly all housing units in Lawrence are occupied. Of the city's "
+        "31,407 housing units, 30,330 are occupied and 1,077 are vacant. "
+        "This represents an occupancy rate of approximately 96.6%, suggesting "
+        "that Lawrence has a relatively limited supply of vacant housing."
+    )
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        st.plotly_chart(
+            plot_housing_occupancy(cleaned_housing_occupancy),
+            use_container_width=True
+        )
+
+    with col2:
+        st.dataframe(
+            cleaned_housing_occupancy,
+            use_container_width=True,
+            hide_index=True
+        )
+
+    st.divider()
+
+    # Occupants per Room
+    st.subheader("Occupants per Room by Housing Tenure")
+    st.caption(
+        "Most owner-occupied and renter-occupied homes in Lawrence have no "
+        "more than one occupant per room. Renter-occupied housing accounts for "
+        "a substantially larger number of units than owner-occupied housing. "
+        "Although relatively few households exceed one occupant per room, "
+        "crowded conditions are more common among renters than homeowners."
+    )
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        st.plotly_chart(
+            plot_housing_occupants(cleaned_housing_occupants),
+            use_container_width=True
+        )
+
+    with col2:
+        st.dataframe(
+            cleaned_housing_occupants,
+            use_container_width=True,
+            hide_index=True
+        )
+
+    st.divider()
+
+    # Housing Unit Count
+    st.subheader("Housing Units by Structure Type")
+    st.caption(
+        "This chart shows how Lawrence's housing supply is distributed across "
+        "different building types. It helps distinguish between smaller "
+        "residential properties, such as single-family homes, and larger "
+        "multi-unit buildings. The distribution provides insight into the "
+        "city's housing density and the types of homes available to residents."
+    )
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        st.plotly_chart(
+            plot_housing_unit_count(cleaned_housing_unit_count),
+            use_container_width=True
+        )
+
+    with col2:
+        st.dataframe(
+            cleaned_housing_unit_count,
+            use_container_width=True,
+            hide_index=True
+        )
+
+    st.divider()
+
+    # Year Built
+    st.subheader("Age of Lawrence's Housing Stock")
+    st.caption(
+        "The year-built distribution illustrates the age of Lawrence's housing "
+        "stock. A large concentration of homes in older construction periods "
+        "would indicate that many properties may require continued maintenance, "
+        "renovation, or energy-efficiency improvements. Newer construction "
+        "categories show the extent to which the city's housing supply has "
+        "expanded in recent decades."
+    )
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        st.plotly_chart(
+            plot_housing_year_built(cleaned_housing_year_built),
+            use_container_width=True
+        )
+
+    with col2:
+        st.dataframe(
+            cleaned_housing_year_built,
+            use_container_width=True,
+            hide_index=True
+        )
+
+    st.divider()
+
+    # Rent Price
+    st.subheader("Monthly Gross Rent")
+    st.caption(
+        "The gross-rent distribution shows the number of rental units within "
+        "each monthly price range. This makes it possible to identify the most "
+        "common rent levels in Lawrence and assess the availability of lower-cost "
+        "and higher-cost rental housing. Because renters represent a large share "
+        "of occupied housing, rent levels are an important measure of housing "
+        "affordability in the city."
+    )
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        st.plotly_chart(
+            plot_housing_rent_price(cleaned_housing_rent_price),
+            use_container_width=True
+        )
+
+    with col2:
+        st.dataframe(
+            cleaned_housing_rent_price,
+            use_container_width=True,
+            hide_index=True
+        )
+
+    st.divider()
+
+    # Owner-Occupied Home Value
+    st.subheader("Owner-Occupied Home Values")
+    st.caption(
+        "Owner-occupied housing values are concentrated across several price "
+        "ranges, while homes valued below $100,000 have been combined into one "
+        "category for readability. The distribution shows the range of property "
+        "values available to Lawrence homeowners and provides context for local "
+        "homeownership costs and housing-market conditions."
+    )
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        st.plotly_chart(
+            plot_housing_owner_value(cleaned_housing_owner_value),
+            use_container_width=True
+        )
+
+    with col2:
+        st.dataframe(
+            cleaned_housing_owner_value,
+            use_container_width=True,
+            hide_index=True
+        )
+

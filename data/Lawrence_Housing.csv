@@ -1,0 +1,175 @@
+groups,values
+Total housing units,31407
+Occupancy status: Total,31407
+Occupied,30330
+Vacant,1077
+Total occupied housing units,30330
+Owner occupied,9063
+Renter occupied,21267
+Total population in occupied housing units,87096
+Population in owner-occupied units,29126
+Population in renter-occupied units,57970
+Average household size (all occupied units),2.87
+Average household size (owner-occupied),3.21
+Average household size (renter-occupied),2.73
+Total occupied housing units,30330
+Owner occupied,9063
+Owner: 0.50 or less occupants per room,5249
+Owner: 0.51 to 1.00 occupants per room,3115
+Owner: 1.01 to 1.50 occupants per room,408
+Owner: 1.51 to 2.00 occupants per room,230
+Owner: 2.01 or more occupants per room,61
+Renter occupied,21267
+Renter: 0.50 or less occupants per room,10248
+Renter: 0.51 to 1.00 occupants per room,9501
+Renter: 1.01 to 1.50 occupants per room,1073
+Renter: 1.51 to 2.00 occupants per room,372
+Renter: 2.01 or more occupants per room,73
+Total housing units,31407
+"1 unit, detached",6017
+"1 unit, attached",2417
+2 units,4568
+3 or 4 units,9865
+5 to 9 units,2572
+10 to 19 units,1336
+20 to 49 units,1544
+50 or more units,2992
+Mobile home,96
+"Boat, RV, van, etc.",0
+Total housing units,31407
+Built 2014 or later,29
+Built 2010 to 2013,1226
+Built 2000 to 2009,1459
+Built 1990 to 1999,1299
+Built 1980 to 1989,2562
+Built 1970 to 1979,2849
+state,25
+place,34550
+Built 1960 to 1969,2220
+Built 1950 to 1959,2940
+Built 1940 to 1949,1737
+Built 1939 or earlier,15086
+Median year structure built,1944
+Total housing units,31407
+No bedroom (studio),1344
+1 bedroom,5290
+2 bedrooms,9790
+3 bedrooms,11284
+4 bedrooms,2765
+5 or more bedrooms,934
+Total occupied housing units,30330
+Owner occupied,9063
+Owner: No vehicles available,693
+Owner: 1 vehicle available,2654
+Owner: 2 vehicles available,3733
+Owner: 3 or more vehicles available,1074
+Renter occupied,802
+Renter: No vehicles available,107
+Renter: 1 vehicle available,21267
+Renter: 2 vehicles available,6212
+Renter: 3 or more vehicles available,9711
+Total housing units (plumbing),31407
+Complete plumbing facilities,30755
+Lacking complete plumbing facilities,652
+Total housing units (kitchen),30330
+Complete kitchen facilities,29679
+Lacking complete kitchen facilities,651
+Total occupied housing units,30330
+Utility gas,21273
+"Bottled, tank, or LP gas",397
+Electricity,6699
+"Fuel oil, kerosene, etc.",1683
+Coal or coke,0
+Wood,0
+Solar energy,21
+Other fuel,40
+No fuel used,217
+Median gross rent (dollars),1502
+Gross rent: Total renter-occupied units,21267
+Gross rent: With cash rent,20868
+Less than $100,28
+$100 to $149,70
+$150 to $199,67
+$200 to $249,261
+$250 to $299,825
+$300 to $349,863
+$350 to $399,271
+$400 to $449,216
+$450 to $499,305
+$500 to $549,284
+$550 to $599,241
+$600 to $649,151
+$650 to $699,159
+$700 to $749,196
+$750 to $799,152
+$800 to $899,286
+$900 to $999,501
+"$1,000 to $1,249",2634
+"$1,250 to $1,499",2895
+"$1,500 to $1,999",7012
+"$2,000 to $2,499",2700
+"$2,500 to $2,999",676
+"$3,000 to $3,499",75
+No cash rent,0
+Total renter-occupied units,21267
+Less than 10.0 percent,652
+10.0 to 14.9 percent,1443
+15.0 to 19.9 percent,1958
+20.0 to 24.9 percent,2155
+25.0 to 29.9 percent,2568
+30.0 to 34.9 percent,2096
+35.0 to 39.9 percent,1323
+40.0 to 49.9 percent,2267
+50.0 percent or more,6154
+Not computed,651
+Median value of owner-occupied housing units (dollars),370600
+Value: Total owner-occupied units,9063
+"Less than $10,000",102
+"$10,000 to $14,999",0
+"$15,000 to $19,999",0
+"$20,000 to $24,999",17
+"$25,000 to $29,999",0
+"$30,000 to $34,999",26
+"$35,000 to $39,999",0
+"$40,000 to $49,999",13
+"$50,000 to $59,999",1
+"$60,000 to $69,999",25
+"$70,000 to $79,999",32
+"$80,000 to $89,999",0
+"$90,000 to $99,999",0
+"$100,000 to $124,999",22
+"$125,000 to $149,999",42
+"$150,000 to $174,999",411
+"$175,000 to $199,999",62
+"$200,000 to $249,999",1284
+"$250,000 to $299,999",883
+"$300,000 to $399,999",2281
+"$400,000 to $499,999",2361
+"$500,000 to $749,999",1251
+"$750,000 to $999,999",186
+"$1,000,000 to $1,499,999",31
+"$1,500,000 to $1,999,999",22
+"$2,000,000 or more",11
+Total owner-occupied units,9063
+With mortgage: Less than 10.0%,6522
+With mortgage: 10.0 to 14.9%,369
+With mortgage: 15.0 to 19.9%,483
+With mortgage: 20.0 to 24.9%,691
+With mortgage: 25.0 to 29.9%,1017
+With mortgage: 30.0 to 34.9%,657
+With mortgage: 35.0 to 39.9%,714
+With mortgage: 40.0 to 49.9%,609
+With mortgage: 50.0 percent or more,710
+With mortgage: Not computed,1260
+Without mortgage: Less than 10.0%,12
+Without mortgage: 10.0 to 14.9%,2541
+Without mortgage: 15.0 to 19.9%,1018
+Without mortgage: 20.0 to 24.9%,597
+Without mortgage: 25.0 to 29.9%,240
+Without mortgage: 30.0 to 34.9%,149
+Without mortgage: 35.0 to 39.9%,81
+Without mortgage: 40.0 to 49.9%,95
+Without mortgage: 50.0 percent or more,30
+Without mortgage: Not computed,32
+Zero or negative income (with mortgage),237
+Zero or negative income (without mortgage),62
