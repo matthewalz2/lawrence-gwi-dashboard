@@ -723,3 +723,40 @@ def plot_housing_owner_value(data):
     )
 
     return fig
+
+
+# ------------------------------
+# Median Rent by Bedroom Count
+# ------------------------------
+def plot_housing_rent_by_bedroom(data):
+    plot_data = data.copy()
+
+    plot_data["values"] = pd.to_numeric(
+        plot_data["values"],
+        errors="coerce"
+    )
+
+    fig = px.bar(
+        plot_data,
+        x="groups",
+        y="values",
+        title="Median Gross Rent by Bedroom Count",
+        labels={
+            "groups": "Bedrooms",
+            "values": "Median Gross Rent"
+        },
+        text="values"
+    )
+
+    fig.update_traces(
+        marker_color="#2E8B57",
+        texttemplate="$%{text:,.0f}",
+        textposition="outside",
+        hovertemplate="<b>%{x}</b><br>Median Rent: $%{y:,.0f}<extra></extra>"
+    )
+
+    fig.update_layout(
+        margin=dict(t=70, b=40, l=60, r=40)
+    )
+
+    return fig

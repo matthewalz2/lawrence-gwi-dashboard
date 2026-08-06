@@ -21,7 +21,8 @@ from utils.processing import (
     housing_unit_count,
     housing_year_built,
     housing_rent_price,
-    housing_owner_value
+    housing_owner_value,
+    housing_rent_by_bedroom,
 )
 
 from utils.visualization import (
@@ -40,9 +41,9 @@ from utils.visualization import (
     plot_housing_unit_count,
     plot_housing_year_built,
     plot_housing_rent_price,
-    plot_housing_owner_value
+    plot_housing_owner_value,
+    plot_housing_rent_by_bedroom,
 )
-
 
 
 st.title("Lawrence Community Metrics")
@@ -79,16 +80,17 @@ cleaned_employ_com_length = employ_commute_length_processing(employ)
 cleaned_employ_gender_earnings = employ_gender_earnings_processing(employ)
 cleaned_employ_ed_earnings = employ_ed_earnings_processing(employ)
 
-#Housing
+# Housing
 cleaned_housing_occupancy = housing_occupancy(housing)
 cleaned_housing_occupants = housing_occupants_processing(housing)
 cleaned_housing_unit_count = housing_unit_count(housing)
 cleaned_housing_year_built = housing_year_built(housing)
 cleaned_housing_rent_price = housing_rent_price(housing)
 cleaned_housing_owner_value = housing_owner_value(housing)
+cleaned_housing_rent_by_bedroom = housing_rent_by_bedroom(housing)
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs(
-    ["Demographics", "Education", "Economics", "Health", "Housing"]
+    ["Demographics", "Education", "Economics", "Housing", "Health"]
 )
 
 
@@ -97,6 +99,24 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(
 #     st.header("Welcome to the Lawrence GWI Dashboard")
 with tab1:
     st.header("Demographics")
+
+    total_population = demo.loc[demo["groups"] == "Total population", "values"].iloc[0]
+    median_age = demo.loc[demo["groups"] == "Median age (both sexes)", "values"].iloc[0]
+    male_population = demo.loc[demo["groups"] == "Male: Total", "values"].iloc[0]
+    female_population = demo.loc[demo["groups"] == "Female: Total", "values"].iloc[0]
+
+    st.subheader("Population Overview")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Total Population", f"{total_population:,.0f}")
+    with col2:
+        st.metric("Median Age", f"{median_age:.1f}")
+    with col3:
+        st.metric("Male Population", f"{male_population:,.0f}")
+    with col4:
+        st.metric("Female Population", f"{female_population:,.0f}")
+    st.divider()
+
     fig = plot_age_gender(cleaned_demo_age_gender)
     fig2 = plot_race(cleaned_demo_race)
     fig3 = plot_hispanic(cleaned_demo_hispanic)
@@ -112,7 +132,7 @@ with tab1:
     with col1:
         st.plotly_chart(fig, use_container_width=True)
     with col2:
-        st.dataframe(cleaned_demo_age_gender)
+        st.dataframe(cleaned_demo_age_gender, use_container_width=True, hide_index=True)
 
     st.divider()
 
@@ -126,7 +146,7 @@ with tab1:
     with col1:
         st.plotly_chart(fig2, use_container_width=True)
     with col2:
-        st.dataframe(cleaned_demo_race)
+        st.dataframe(cleaned_demo_race, use_container_width=True, hide_index=True)
 
     st.divider()
 
@@ -140,10 +160,45 @@ with tab1:
     with col1:
         st.plotly_chart(fig3, use_container_width=True)
     with col2:
-        st.dataframe(cleaned_demo_hispanic)
+        st.dataframe(cleaned_demo_hispanic, use_container_width=True, hide_index=True)
 
 with tab2:
     st.header("Education")
+
+    total_25_plus = edu.loc[
+        edu["groups"] == "Total population 25 years and over", "values"
+    ].iloc[0]
+
+    less_than_hs = cleaned_edu_attainment.loc[
+        cleaned_edu_attainment["groups"].isin(
+            ["No schooling completed", "Less than 12th grade", "12th grade, no diploma"]
+        ),
+        "values",
+    ].sum()
+    pct_hs_or_higher = 100 - (less_than_hs / total_25_plus * 100)
+
+    bachelors_plus = cleaned_edu_attainment.loc[
+        cleaned_edu_attainment["groups"].isin(
+            [
+                "Bachelor's degree",
+                "Master's degree",
+                "Professional school degree",
+                "Doctorate degree",
+            ]
+        ),
+        "values",
+    ].sum()
+    pct_bachelors_plus = bachelors_plus / total_25_plus * 100
+
+    st.subheader("Education Overview")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Population 25+", f"{total_25_plus:,.0f}")
+    with col2:
+        st.metric("HS Diploma or Higher", f"{pct_hs_or_higher:.1f}%")
+    with col3:
+        st.metric("Bachelor's Degree or Higher", f"{pct_bachelors_plus:.1f}%")
+    st.divider()
 
     fig = plot_attainment(cleaned_edu_attainment)
     fig2 = plot_enrollment(cleaned_edu_enrollment)
@@ -161,7 +216,7 @@ with tab2:
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        st.dataframe(cleaned_edu_attainment, use_container_width=True)
+        st.dataframe(cleaned_edu_attainment, use_container_width=True, hide_index=True)
 
     st.divider()
 
@@ -176,7 +231,7 @@ with tab2:
         st.plotly_chart(fig2, use_container_width=True)
 
     with col2:
-        st.dataframe(cleaned_edu_enrollment, use_container_width=True)
+        st.dataframe(cleaned_edu_enrollment, use_container_width=True, hide_index=True)
 
     st.divider()
 
@@ -191,7 +246,7 @@ with tab2:
         st.plotly_chart(fig3, use_container_width=True)
 
     with col2:
-        st.dataframe(cleaned_edu_tech_access, use_container_width=True)
+        st.dataframe(cleaned_edu_tech_access, use_container_width=True, hide_index=True)
 
     st.divider()
 
@@ -206,7 +261,7 @@ with tab2:
         st.plotly_chart(fig4, use_container_width=True)
 
     with col2:
-        st.dataframe(cleaned_edu_internet, use_container_width=True)
+        st.dataframe(cleaned_edu_internet, use_container_width=True, hide_index=True)
 
 with tab3:
     male_workers = cleaned_employ_gender_earnings.loc[
@@ -304,7 +359,7 @@ with tab3:
         st.plotly_chart(plot_labor(cleaned_employ_labor), use_container_width=True)
 
     with col2:
-        st.dataframe(cleaned_employ_labor, use_container_width=True)
+        st.dataframe(cleaned_employ_labor, use_container_width=True, hide_index=True)
 
     st.divider()
 
@@ -319,7 +374,7 @@ with tab3:
         st.plotly_chart(plot_commute(cleaned_employ_commute), use_container_width=True)
 
     with col2:
-        st.dataframe(cleaned_employ_commute, use_container_width=True)
+        st.dataframe(cleaned_employ_commute, use_container_width=True, hide_index=True)
 
     st.divider()
 
@@ -336,11 +391,39 @@ with tab3:
         )
 
     with col2:
-        st.dataframe(cleaned_employ_com_length, use_container_width=True)
+        st.dataframe(
+            cleaned_employ_com_length, use_container_width=True, hide_index=True
+        )
 with tab4:
-    st.header("Health")
-with tab5:
     st.header("Housing")
+
+    total_units = cleaned_housing_occupancy.loc[
+        cleaned_housing_occupancy["groups"] == "Occupancy status: Total", "values"
+    ].iloc[0]
+    occupied_units = cleaned_housing_occupancy.loc[
+        cleaned_housing_occupancy["groups"] == "Occupied", "values"
+    ].iloc[0]
+    occupancy_rate = occupied_units / total_units * 100
+
+    median_rent = housing.loc[
+        housing["groups"] == "Median gross rent (dollars)", "values"
+    ].iloc[0]
+    median_home_value = housing.loc[
+        housing["groups"] == "Median value of owner-occupied housing units (dollars)",
+        "values",
+    ].iloc[0]
+
+    st.subheader("Housing Overview")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Total Housing Units", f"{total_units:,.0f}")
+    with col2:
+        st.metric("Occupancy Rate", f"{occupancy_rate:.1f}%")
+    with col3:
+        st.metric("Median Gross Rent", f"${median_rent:,.0f}")
+    with col4:
+        st.metric("Median Home Value", f"${median_home_value:,.0f}")
+    st.divider()
 
     # Housing Occupancy
     st.subheader("Housing Occupancy Status")
@@ -355,15 +438,12 @@ with tab5:
 
     with col1:
         st.plotly_chart(
-            plot_housing_occupancy(cleaned_housing_occupancy),
-            use_container_width=True
+            plot_housing_occupancy(cleaned_housing_occupancy), use_container_width=True
         )
 
     with col2:
         st.dataframe(
-            cleaned_housing_occupancy,
-            use_container_width=True,
-            hide_index=True
+            cleaned_housing_occupancy, use_container_width=True, hide_index=True
         )
 
     st.divider()
@@ -382,15 +462,12 @@ with tab5:
 
     with col1:
         st.plotly_chart(
-            plot_housing_occupants(cleaned_housing_occupants),
-            use_container_width=True
+            plot_housing_occupants(cleaned_housing_occupants), use_container_width=True
         )
 
     with col2:
         st.dataframe(
-            cleaned_housing_occupants,
-            use_container_width=True,
-            hide_index=True
+            cleaned_housing_occupants, use_container_width=True, hide_index=True
         )
 
     st.divider()
@@ -410,14 +487,12 @@ with tab5:
     with col1:
         st.plotly_chart(
             plot_housing_unit_count(cleaned_housing_unit_count),
-            use_container_width=True
+            use_container_width=True,
         )
 
     with col2:
         st.dataframe(
-            cleaned_housing_unit_count,
-            use_container_width=True,
-            hide_index=True
+            cleaned_housing_unit_count, use_container_width=True, hide_index=True
         )
 
     st.divider()
@@ -438,14 +513,12 @@ with tab5:
     with col1:
         st.plotly_chart(
             plot_housing_year_built(cleaned_housing_year_built),
-            use_container_width=True
+            use_container_width=True,
         )
 
     with col2:
         st.dataframe(
-            cleaned_housing_year_built,
-            use_container_width=True,
-            hide_index=True
+            cleaned_housing_year_built, use_container_width=True, hide_index=True
         )
 
     st.divider()
@@ -466,14 +539,42 @@ with tab5:
     with col1:
         st.plotly_chart(
             plot_housing_rent_price(cleaned_housing_rent_price),
-            use_container_width=True
+            use_container_width=True,
         )
 
     with col2:
         st.dataframe(
-            cleaned_housing_rent_price,
+            cleaned_housing_rent_price, use_container_width=True, hide_index=True
+        )
+
+    st.divider()
+
+    # Rent by Bedroom Count
+    st.subheader("Median Gross Rent by Bedroom Count")
+    st.caption(
+        "The overall median gross rent of \\$1,502 blends every unit size together, "
+        "which understates what smaller households actually pay and overstates it "
+        "for larger ones. Broken out by bedroom count, studios run far lower at "
+        "\\$762 and one-bedrooms at \\$991, while rent climbs steadily through "
+        "two-bedroom (\\$1,507), three-bedroom (\\$1,692), and four-bedroom (\\$1,811) "
+        "units. The dip at five-plus bedrooms (\\$1,639) likely reflects a small "
+        "sample of such units in Lawrence rather than an actual price drop. "
+        "This context matters when comparing Lawrence to other Massachusetts "
+        "cities, since a single blended rent figure isn't a fair stand-in for the "
+        "cost of a specific unit size."
+    )
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        st.plotly_chart(
+            plot_housing_rent_by_bedroom(cleaned_housing_rent_by_bedroom),
             use_container_width=True,
-            hide_index=True
+        )
+
+    with col2:
+        st.dataframe(
+            cleaned_housing_rent_by_bedroom, use_container_width=True, hide_index=True
         )
 
     st.divider()
@@ -482,7 +583,7 @@ with tab5:
     st.subheader("Owner-Occupied Home Values")
     st.caption(
         "Owner-occupied housing values are concentrated across several price "
-        "ranges, while homes valued below $100,000 have been combined into one "
+        "ranges, while homes valued below \\$100,000 have been combined into one "
         "category for readability. The distribution shows the range of property "
         "values available to Lawrence homeowners and provides context for local "
         "homeownership costs and housing-market conditions."
@@ -493,13 +594,12 @@ with tab5:
     with col1:
         st.plotly_chart(
             plot_housing_owner_value(cleaned_housing_owner_value),
-            use_container_width=True
+            use_container_width=True,
         )
 
     with col2:
         st.dataframe(
-            cleaned_housing_owner_value,
-            use_container_width=True,
-            hide_index=True
+            cleaned_housing_owner_value, use_container_width=True, hide_index=True
         )
-
+with tab5:
+    st.header("Health")

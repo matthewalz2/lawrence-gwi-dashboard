@@ -388,6 +388,33 @@ def housing_rent_price(housing_df):
   rent_price = housing_df[88:111].copy()
   return rent_price
 
+def housing_rent_by_bedroom(housing_df):
+    rent_by_bedroom = housing_df[
+        housing_df["groups"].str.startswith("Median gross rent: ")
+    ].copy()
+
+    rent_by_bedroom["groups"] = rent_by_bedroom["groups"].str.replace(
+        "Median gross rent: ", "", regex=False
+    )
+    rent_by_bedroom["groups"] = rent_by_bedroom["groups"].replace(
+        "No bedroom", "Studio"
+    )
+
+    bedroom_order = [
+        "Studio",
+        "1 bedroom",
+        "2 bedrooms",
+        "3 bedrooms",
+        "4 bedrooms",
+        "5 or more bedrooms",
+    ]
+
+    rent_by_bedroom["groups"] = pd.Categorical(
+        rent_by_bedroom["groups"], categories=bedroom_order, ordered=True
+    )
+
+    return rent_by_bedroom.sort_values("groups").reset_index(drop=True)
+
 def housing_owner_value(housing_df):
     owner_value = housing_df[125:151].copy()
 
