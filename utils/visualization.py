@@ -524,6 +524,43 @@ def plot_housing_occupancy(data):
 
 
 # ------------------------------
+# Housing Tenure
+# ------------------------------
+def plot_housing_tenure(data):
+    plot_data = data.copy()
+
+    plot_data["values"] = pd.to_numeric(
+        plot_data["values"],
+        errors="coerce"
+    )
+
+    fig = px.pie(
+        plot_data,
+        names="groups",
+        values="values",
+        hole=0.45,
+        title="Housing Tenure: Owner vs. Renter",
+        color="groups",
+        color_discrete_map={
+            "Owner occupied": "#2E8B57",
+            "Renter occupied": "#B0B0B0"
+        }
+    )
+
+    fig.update_traces(
+        textinfo="label+percent",
+        hovertemplate="<b>%{label}</b><br>Housing Units: %{value:,.0f}<br>Percent: %{percent}<extra></extra>"
+    )
+
+    fig.update_layout(
+        legend_title="Tenure",
+        margin=dict(t=70, b=30, l=30, r=30)
+    )
+
+    return fig
+
+
+# ------------------------------
 # Occupants per Room
 # ------------------------------
 def plot_housing_occupants(data):

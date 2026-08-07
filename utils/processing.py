@@ -333,6 +333,10 @@ def housing_occupancy(housing_df):
   occupany = housing_df[1:4].copy()
   return occupany
 
+def housing_tenure_processing(housing_df):
+  tenure = housing_df[5:7].copy()
+  return tenure
+
 def housing_occupants_processing(housing_df):
     occupants = housing_df.iloc[14:26].copy()
 

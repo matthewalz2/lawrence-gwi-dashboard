@@ -17,6 +17,7 @@ from utils.processing import (
     employ_gender_earnings_processing,
     employ_ed_earnings_processing,
     housing_occupancy,
+    housing_tenure_processing,
     housing_occupants_processing,
     housing_unit_count,
     housing_year_built,
@@ -37,6 +38,7 @@ from utils.visualization import (
     plot_com_length,
     plot_hispanic,
     plot_housing_occupancy,
+    plot_housing_tenure,
     plot_housing_occupants,
     plot_housing_unit_count,
     plot_housing_year_built,
@@ -82,6 +84,7 @@ cleaned_employ_ed_earnings = employ_ed_earnings_processing(employ)
 
 # Housing
 cleaned_housing_occupancy = housing_occupancy(housing)
+cleaned_housing_tenure = housing_tenure_processing(housing)
 cleaned_housing_occupants = housing_occupants_processing(housing)
 cleaned_housing_unit_count = housing_unit_count(housing)
 cleaned_housing_year_built = housing_year_built(housing)
@@ -98,14 +101,14 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(
 # with tab1:
 #     st.header("Welcome to the Lawrence GWI Dashboard")
 with tab1:
-    st.header("Demographics")
+    # st.header("Demographics")
 
     total_population = demo.loc[demo["groups"] == "Total population", "values"].iloc[0]
     median_age = demo.loc[demo["groups"] == "Median age (both sexes)", "values"].iloc[0]
     male_population = demo.loc[demo["groups"] == "Male: Total", "values"].iloc[0]
     female_population = demo.loc[demo["groups"] == "Female: Total", "values"].iloc[0]
 
-    st.subheader("Population Overview")
+    st.subheader("Population Overview :gray[(ACS 2018–2022 5-Year Estimate)]")
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Total Population", f"{total_population:,.0f}")
@@ -163,41 +166,68 @@ with tab1:
         st.dataframe(cleaned_demo_hispanic, use_container_width=True, hide_index=True)
 
 with tab2:
-    st.header("Education")
+    # st.header("Education")
 
     total_25_plus = edu.loc[
         edu["groups"] == "Total population 25 years and over", "values"
     ].iloc[0]
 
+    # Bucketed to match the same 5 education levels used in the Economics
+    # tab's "Earnings by Education Level" (Less Than High School, High School
+    # Graduate, Some College, Bachelor's Degree, Graduate Degree)
     less_than_hs = cleaned_edu_attainment.loc[
         cleaned_edu_attainment["groups"].isin(
             ["No schooling completed", "Less than 12th grade", "12th grade, no diploma"]
         ),
         "values",
     ].sum()
-    pct_hs_or_higher = 100 - (less_than_hs / total_25_plus * 100)
+    pct_less_than_hs = less_than_hs / total_25_plus * 100
 
-    bachelors_plus = cleaned_edu_attainment.loc[
+    hs_grad = cleaned_edu_attainment.loc[
+        cleaned_edu_attainment["groups"].isin(
+            ["Regular high school diploma", "GED or alternative credential"]
+        ),
+        "values",
+    ].sum()
+    pct_hs_grad = hs_grad / total_25_plus * 100
+
+    some_college = cleaned_edu_attainment.loc[
         cleaned_edu_attainment["groups"].isin(
             [
-                "Bachelor's degree",
-                "Master's degree",
-                "Professional school degree",
-                "Doctorate degree",
+                "Some college, less than 1 year",
+                "Some college, 1 or more years, no degree",
+                "Associate's degree",
             ]
         ),
         "values",
     ].sum()
-    pct_bachelors_plus = bachelors_plus / total_25_plus * 100
+    pct_some_college = some_college / total_25_plus * 100
 
-    st.subheader("Education Overview")
-    col1, col2, col3 = st.columns(3)
+    bachelors = cleaned_edu_attainment.loc[
+        cleaned_edu_attainment["groups"] == "Bachelor's degree", "values"
+    ].sum()
+    pct_bachelors = bachelors / total_25_plus * 100
+
+    grad_degree = cleaned_edu_attainment.loc[
+        cleaned_edu_attainment["groups"].isin(
+            ["Master's degree", "Professional school degree", "Doctorate degree"]
+        ),
+        "values",
+    ].sum()
+    pct_grad_degree = grad_degree / total_25_plus * 100
+
+    st.subheader("Education Overview :gray[(ACS 2018–2022 5-Year Estimate)]")
+    col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
-        st.metric("Population 25+", f"{total_25_plus:,.0f}")
+        st.metric("Less Than High School", f"{pct_less_than_hs:.1f}%")
     with col2:
-        st.metric("HS Diploma or Higher", f"{pct_hs_or_higher:.1f}%")
+        st.metric("High School Graduate", f"{pct_hs_grad:.1f}%")
     with col3:
-        st.metric("Bachelor's Degree or Higher", f"{pct_bachelors_plus:.1f}%")
+        st.metric("Some College", f"{pct_some_college:.1f}%")
+    with col4:
+        st.metric("Bachelor's Degree", f"{pct_bachelors:.1f}%")
+    with col5:
+        st.metric("Graduate Degree", f"{pct_grad_degree:.1f}%")
     st.divider()
 
     fig = plot_attainment(cleaned_edu_attainment)
@@ -285,7 +315,9 @@ with tab3:
         "values",
     ].iloc[0]
 
-    st.subheader("Earnings by Gender")
+    st.subheader("Economics Overview :gray[(ACS 2018–2022 5-Year Estimate)]")
+
+    st.markdown("##### Earnings by Gender")
 
     col1, col2, col3, col4 = st.columns(4)
 
@@ -329,7 +361,7 @@ with tab3:
         "values",
     ].iloc[0]
 
-    st.subheader("Earnings by Education Level")
+    st.markdown("##### Earnings by Education Level")
     col1, col2, col3, col4, col5 = st.columns(5)
 
     with col1:
@@ -395,7 +427,7 @@ with tab3:
             cleaned_employ_com_length, use_container_width=True, hide_index=True
         )
 with tab4:
-    st.header("Housing")
+    # st.header("Housing")
 
     total_units = cleaned_housing_occupancy.loc[
         cleaned_housing_occupancy["groups"] == "Occupancy status: Total", "values"
@@ -413,7 +445,7 @@ with tab4:
         "values",
     ].iloc[0]
 
-    st.subheader("Housing Overview")
+    st.subheader("Housing Overview :gray[(ACS 2018–2022 5-Year Estimate)]")
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Total Housing Units", f"{total_units:,.0f}")
@@ -448,6 +480,32 @@ with tab4:
 
     st.divider()
 
+    # Housing Tenure
+    st.subheader("Housing Tenure: Owner vs. Renter")
+    st.caption(
+        "Lawrence is a renter-majority city. Of the 30,330 occupied housing "
+        "units, 21,267 (70.1%) are renter-occupied and only 9,063 (29.9%) are "
+        "owner-occupied. This renter-heavy tenure mix is consistent with the "
+        "city's housing stock, which is dominated by small multi-unit buildings "
+        "rather than single-family homes, and it shapes which cost burdens "
+        "matter most locally — gross rent and rent burden carry more weight "
+        "here than mortgage costs do."
+    )
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        st.plotly_chart(
+            plot_housing_tenure(cleaned_housing_tenure), use_container_width=True
+        )
+
+    with col2:
+        st.dataframe(
+            cleaned_housing_tenure, use_container_width=True, hide_index=True
+        )
+
+    st.divider()
+
     # Occupants per Room
     st.subheader("Occupants per Room by Housing Tenure")
     st.caption(
@@ -475,10 +533,15 @@ with tab4:
     # Housing Unit Count
     st.subheader("Housing Units by Structure Type")
     st.caption(
-        "This chart shows how Lawrence's housing supply is distributed across "
-        "different building types. It helps distinguish between smaller "
-        "residential properties, such as single-family homes, and larger "
-        "multi-unit buildings. The distribution provides insight into the "
+        "The Total Housing Units figure includes every structure type shown "
+        "below — single-family houses and multi-unit apartment buildings "
+        "alike. This chart shows how that supply is distributed across "
+        "different building types, distinguishing between smaller residential "
+        "properties, such as single-family homes, and larger multi-unit "
+        "buildings. The largest single category is 3- or 4-unit buildings "
+        "(9,865 units), consistent with Lawrence's classic New England "
+        "mill-town housing stock of triple-deckers, rather than large "
+        "apartment complexes. The distribution provides insight into the "
         "city's housing density and the types of homes available to residents."
     )
 
